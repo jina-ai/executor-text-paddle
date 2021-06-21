@@ -22,7 +22,7 @@ def document_array(content):
 
 @pytest.fixture(scope='function')
 def parameters(content):
-    return {'traverse_path': 'r', 'batch_size': 10}
+    return {'traverse_paths': 'r', 'batch_size': 10}
 
 
 def test_text_paddle(model, document_array, content, parameters):

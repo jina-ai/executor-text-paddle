@@ -1,7 +1,7 @@
 __copyright__ = "Copyright (c) 2020-2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Union
 
 import numpy as np
 import paddlehub as hub
@@ -44,7 +44,7 @@ class TextPaddleEncoder(Executor):
         model_name: Optional[str] = 'ernie_tiny',
         on_gpu: bool = False,
         default_batch_size: int = 32,
-        default_traversal_path: str = 'r',
+        default_traversal_paths: Union[str, List[str]] = 'r',
         *args,
         **kwargs,
     ):
@@ -52,14 +52,16 @@ class TextPaddleEncoder(Executor):
         self.on_gpu = on_gpu
         self.model = hub.Module(name=model_name)
         self.default_batch_size = default_batch_size
-        self.default_traversal_path = default_traversal_path
+        self.default_traversal_paths = default_traversal_paths
 
     def _get_input_data(self, docs, parameters):
-        traversal_path = parameters.get('traversal_path', self.default_traversal_path)
+        trav_paths = parameters.get('traversal_paths', self.default_traversal_paths)
         batch_size = parameters.get('batch_size', self.default_batch_size)
 
         # traverse thought all documents which have to be processed
-        flat_docs = docs.traverse_flat(traversal_path)
+        flat_docs = []
+        for trav_path in trav_paths:
+            flat_docs.extend(docs.traverse_flat(trav_path))
 
         # filter out documents without text
         filtered_docs = [doc for doc in flat_docs if doc.text is not None]
