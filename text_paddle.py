@@ -1,11 +1,16 @@
 __copyright__ = "Copyright (c) 2020-2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
-from typing import Optional
+from typing import Optional, List, Any, Dict
 
 import numpy as np
 import paddlehub as hub
 from jina import Executor, DocumentArray, requests
+
+
+def _batch_generator(data: List[Any], batch_size: int):
+    for i in range(0, len(data), batch_size):
+        yield data[i : i + batch_size]
 
 
 class TextPaddleEncoder(Executor):
@@ -27,6 +32,9 @@ class TextPaddleEncoder(Executor):
         ``chinese-bert-wwm-ext``, ``chinese-electra-base``,
         ``chinese-electra-small``, ``chinese-roberta-wwm-ext``,
         ``chinese-roberta-wwm-ext-large``, ``rbt3``, ``rbtl3``
+    :param on_gpu: If use gpu to get the output.
+    :param default_batch_size: fallback batch size in case there is not batch size sent in the request
+    :param default_traversal_path: fallback traversal path in case there is not traversal path sent in the request
     :param args:  Additional positional arguments
     :param kwargs: Additional keyword arguments
     """
@@ -35,26 +43,48 @@ class TextPaddleEncoder(Executor):
         self,
         model_name: Optional[str] = 'ernie_tiny',
         on_gpu: bool = False,
+        default_batch_size: int = 32,
+        default_traversal_path: str = 'r',
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.model = hub.Module(name=model_name)
         self.on_gpu = on_gpu
+        self.model = hub.Module(name=model_name)
+        self.default_batch_size = default_batch_size
+        self.default_traversal_path = default_traversal_path
+
+    def _get_input_data(self, docs, parameters):
+        traversal_path = parameters.get('traversal_path', self.default_traversal_path)
+        batch_size = parameters.get('batch_size', self.default_batch_size)
+
+        # traverse thought all documents which have to be processed
+        flat_docs = docs.traverse_flat(traversal_path)
+
+        # filter out documents without text
+        filtered_docs = [doc for doc in flat_docs if doc.text is not None]
+
+        return _batch_generator(filtered_docs, batch_size)
 
     @requests
-    def encode(self, docs: DocumentArray, **kwargs):
+    def encode(self, docs: DocumentArray, parameters: Optional[Dict] = {}, **kwargs):
         """Encode doc content into vector representation.
 
         :param docs: `DocumentArray` passed from the previous ``Executor``.
+        :param parameters: dictionary to define the `traversal_path` and the `batch_size`. For example,
+            `parameters={'traversal_path': 'r', 'batch_size': 10}` will override the `self.default_traversal_path` and
+            `self.default_batch_size`.
         :param kwargs: Additional key value arguments.
         """
-        for doc in docs:
-            pooled_features = []
-            results = self.model.get_embedding(
-                np.atleast_2d(doc.content).reshape(-1, 1).tolist(), use_gpu=self.on_gpu
-            )
-            for emb in results:
-                pooled_feature, seq_feature = emb
-                pooled_features.append(pooled_feature)
-            doc.embedding = np.asarray(pooled_features)
+        if docs:
+            document_batches_generator = self._get_input_data(docs, parameters)
+            for batch_of_docs in document_batches_generator:
+                pooled_features = []
+                contents = [[doc.content] for doc in batch_of_docs]
+                print(f"\n\n{contents}\n\n")
+                results = self.model.get_embedding(contents, use_gpu=self.on_gpu)
+                for emb in results:
+                    pooled_feature, seq_feature = emb
+                    pooled_features.append(pooled_feature)
+                for doc, feature in zip(batch_of_docs, pooled_features):
+                    doc.embedding = np.asarray(feature)

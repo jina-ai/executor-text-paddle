@@ -20,13 +20,18 @@ def document_array(content):
     return DocumentArray([Document(content=content)])
 
 
-def test_text_paddle(model, document_array, content):
+@pytest.fixture(scope='function')
+def parameters(content):
+    return {'traverse_path': 'r', 'batch_size': 10}
+
+
+def test_text_paddle(model, document_array, content, parameters):
     ex = BaseExecutor.load_config('../../config.yml')
     assert ex.on_gpu is False
-    ex.encode(document_array)
+    ex.encode(document_array, parameters)
     for doc in document_array:
         assert isinstance(doc.embedding, np.ndarray)
-        assert doc.embedding.shape == (1, 1024)
+        assert doc.embedding.shape == (1024,)
     embeds = model.get_embedding([[content]])
     pooled_features = []
     for embed in embeds:
