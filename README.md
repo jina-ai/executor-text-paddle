@@ -84,7 +84,7 @@ pods:
 from jina import Flow, Document
 
 f = Flow().add(uses='jinahub+docker://TextPaddleEncoder',
-               volumes='/Users/nanwang/.cache/paddle:/root/.cache/paddle')
+               volumes='/Users/[volume]/.cache/paddle:/root/.cache/paddle')
 
 
 def check_resp(resp):
