@@ -34,7 +34,7 @@ class TextPaddleEncoder(Executor):
         ``chinese-roberta-wwm-ext-large``, ``rbt3``, ``rbtl3``
     :param on_gpu: If use gpu to get the output.
     :param default_batch_size: fallback batch size in case there is not batch size sent in the request
-    :param default_traversal_path: fallback traversal path in case there is not traversal path sent in the request
+    :param default_traversal_paths: fallback traversal path in case there is not traversal path sent in the request
     :param args:  Additional positional arguments
     :param kwargs: Additional keyword arguments
     """
@@ -60,11 +60,8 @@ class TextPaddleEncoder(Executor):
 
         # traverse thought all documents which have to be processed
         flat_docs = []
-        if isinstance(trav_paths, str):
-            flat_docs = docs.traverse_flat(trav_paths)
-        else:
-            for trav_path in trav_paths:
-                flat_docs.extend(docs.traverse_flat(trav_path))
+        for trav_path in trav_paths:
+            flat_docs.extend(docs.traverse_flat(trav_path))
 
         # filter out documents without text
         filtered_docs = [doc for doc in flat_docs if doc.text]
@@ -77,7 +74,7 @@ class TextPaddleEncoder(Executor):
 
         :param docs: `DocumentArray` passed from the previous ``Executor``.
         :param parameters: dictionary to define the `traversal_path` and the `batch_size`. For example,
-            `parameters={'traversal_path': 'r', 'batch_size': 10}` will override the `self.default_traversal_path` and
+            `parameters={'traversal_paths': 'r', 'batch_size': 10}` will override the `self.default_traversal_paths` and
             `self.default_batch_size`.
         :param kwargs: Additional key value arguments.
         """
