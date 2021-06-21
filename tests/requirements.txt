@@ -2,3 +2,4 @@ paddlepaddle==2.1.0
 paddlehub==2.1.0
 jina==2.0.0rc6
 pytest==6.2.4
+sentencepiece==0.1.96

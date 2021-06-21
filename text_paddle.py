@@ -14,7 +14,7 @@ class TextPaddleEncoder(Executor):
     Internally, :class:`TextPaddlehubEncoder` wraps the Ernie module from paddlehub.
     https://github.com/PaddlePaddle/PaddleHub
     For models' details refer to
-    https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=SemanticModel
+        https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=SemanticModel
 
     :param model_name: the name of the model. Supported models include
         ``ernie``, ``ernie_tiny``, ``ernie_v2_eng_base``, ``ernie_v2_eng_large``,
@@ -28,17 +28,30 @@ class TextPaddleEncoder(Executor):
     :param kwargs: Additional keyword arguments
     """
 
-    def __init__(self, model_name: Optional[str] = 'ernie_tiny', *args, **kwargs):
+    def __init__(
+        self,
+        model_name: Optional[str] = 'ernie_tiny',
+        on_gpu: Optional[bool] = False,
+        *args,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.model = hub.Module(name=model_name)
+        self.on_gpu = on_gpu
 
     @requests
     def encode(self, docs: DocumentArray, **kwargs):
+        """Encode doc content into vector representation.
+
+        :param docs: `DocumentArray` passed from the previous ``Executor``.
+        :param kwargs: Additional key value arguments.
+        """
         for doc in docs:
-            results = []
-            _raw_results = self.model.get_embedding(
-                np.atleast_2d(doc.content).reshape(-1, 1).tolist(), use_gpu=self.on_gpu)
-            for emb in _raw_results:
-                _pooled_feature, _seq_feature = emb
-                results.append(_pooled_feature)
-            doc.embedding = results
+            pooled_features = []
+            results = self.model.get_embedding(
+                np.atleast_2d(doc.content).reshape(-1, 1).tolist(), use_gpu=self.on_gpu
+            )
+            for emb in results:
+                pooled_feature, seq_feature = emb
+                pooled_features.append(pooled_feature)
+            doc.embedding = np.asarray(pooled_features)
