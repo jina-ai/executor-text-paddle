@@ -60,11 +60,14 @@ class TextPaddleEncoder(Executor):
 
         # traverse thought all documents which have to be processed
         flat_docs = []
-        for trav_path in trav_paths:
-            flat_docs.extend(docs.traverse_flat(trav_path))
+        if isinstance(trav_paths, str):
+            flat_docs = docs.traverse_flat(trav_paths)
+        else:
+            for trav_path in trav_paths:
+                flat_docs.extend(docs.traverse_flat(trav_path))
 
         # filter out documents without text
-        filtered_docs = [doc for doc in flat_docs if doc.text is not None]
+        filtered_docs = [doc for doc in flat_docs if doc.text]
 
         return _batch_generator(filtered_docs, batch_size)
 
@@ -85,7 +88,7 @@ class TextPaddleEncoder(Executor):
                 contents = [[doc.content] for doc in batch_of_docs]
                 results = self.model.get_embedding(contents, use_gpu=self.on_gpu)
                 for emb in results:
-                    pooled_feature, seq_feature = emb
+                    pooled_feature, _ = emb
                     pooled_features.append(pooled_feature)
                 for doc, feature in zip(batch_of_docs, pooled_features):
                     doc.embedding = np.asarray(feature)
