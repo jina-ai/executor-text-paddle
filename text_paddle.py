@@ -59,9 +59,7 @@ class TextPaddleEncoder(Executor):
         batch_size = parameters.get('batch_size', self.default_batch_size)
 
         # traverse thought all documents which have to be processed
-        flat_docs = []
-        for trav_path in trav_paths:
-            flat_docs.extend(docs.traverse_flat(trav_path))
+        flat_docs = docs.traverse_flat(trav_paths)
 
         # filter out documents without text
         filtered_docs = [doc for doc in flat_docs if doc.text]
