@@ -1,3 +1,6 @@
+__copyright__ = "Copyright (c) 2020-2021 Jina AI Limited. All rights reserved."
+__license__ = "Apache-2.0"
+
 from typing import Optional
 
 import numpy as np
@@ -31,7 +34,7 @@ class TextPaddleEncoder(Executor):
     def __init__(
         self,
         model_name: Optional[str] = 'ernie_tiny',
-        on_gpu: Optional[bool] = False,
+        on_gpu: bool = False,
         *args,
         **kwargs
     ):
