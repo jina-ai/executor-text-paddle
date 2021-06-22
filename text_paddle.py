@@ -82,7 +82,7 @@ class TextPaddleEncoder(Executor):
                 pooled_features = []
                 contents = [[doc.content] for doc in batch_of_docs]
                 results = self.model.get_embedding(contents, use_gpu=self.on_gpu)
-                for emb in results:
+                for pool_feature, _ in results:
                     pooled_feature, _ = emb
                     pooled_features.append(pooled_feature)
                 for doc, feature in zip(batch_of_docs, pooled_features):
