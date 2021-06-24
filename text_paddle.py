@@ -44,7 +44,7 @@ class TextPaddleEncoder(Executor):
         model_name: Optional[str] = 'ernie_tiny',
         on_gpu: bool = False,
         default_batch_size: int = 32,
-        default_traversal_paths: Union[str, List[str]] = 'r',
+        default_traversal_paths: List[str] = ['r'],
         *args,
         **kwargs,
     ):
@@ -72,7 +72,7 @@ class TextPaddleEncoder(Executor):
 
         :param docs: `DocumentArray` passed from the previous ``Executor``.
         :param parameters: dictionary to define the `traversal_path` and the `batch_size`. For example,
-            `parameters={'traversal_paths': 'r', 'batch_size': 10}` will override the `self.default_traversal_paths` and
+            `parameters={'traversal_paths': ['r'], 'batch_size': 10}` will override the `self.default_traversal_paths` and
             `self.default_batch_size`.
         :param kwargs: Additional key value arguments.
         """
