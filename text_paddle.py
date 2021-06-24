@@ -71,9 +71,8 @@ class TextPaddleEncoder(Executor):
         """Encode doc content into vector representation.
 
         :param docs: `DocumentArray` passed from the previous ``Executor``.
-        :param parameters: dictionary to define the `traversal_path` and the `batch_size`. For example,
-            `parameters={'traversal_paths': ['r'], 'batch_size': 10}` will override the `self.default_traversal_paths` and
-            `self.default_batch_size`.
+        :param parameters: dictionary to define the `traversal_paths` and the `batch_size`. For example,
+            `parameters={'traversal_paths': ['r'], 'batch_size': 10}`.
         :param kwargs: Additional key value arguments.
         """
         if docs:
