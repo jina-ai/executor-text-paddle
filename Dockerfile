@@ -6,8 +6,7 @@ RUN apt-get update && \
 
 # install requirements before copying the workspace
 COPY requirements.txt /requirements.txt
-RUN pip install $(grep -ivE "paddlepaddle" requirements.txt)
-RUN pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
+RUN pip install -r requirements.txt
 
 # setup the workspace
 COPY . /workspace
