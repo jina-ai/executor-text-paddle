@@ -21,7 +21,8 @@ Use the prebuilt images from JinaHub in your python codes,
 ```python
 from jina import Flow
 	
-f = Flow().add(uses='jinahub+docker://TextPaddleEncoder')
+f = Flow().add(uses='jinahub+docker://TextPaddleEncoder',
+               volumes='/your_home_folder/.paddlehub:/root/.paddlehub')
 ```
 
 or in the `.yml` config.
@@ -31,6 +32,7 @@ jtype: Flow
 pods:
   - name: encoder
     uses: 'jinahub+docker://TextPaddleEncoder'
+    volumes: '/your_home_folder/.paddlehub:/root/.paddlehub'
 ```
 
 
@@ -68,7 +70,8 @@ pods:
 	from jina import Flow
 	
 	f = Flow().add(
-	        uses='docker://jinahub-text-paddle:latest')
+	        uses='docker://jinahub-text-paddle:latest',
+            volumes='/your_home_folder/.paddlehub:/root/.paddlehub')
 	```
 	
 
@@ -79,7 +82,8 @@ pods:
 ```python
 from jina import Flow, Document
 
-f = Flow().add(uses='jinahub+docker://TextPaddleEncoder')
+f = Flow().add(uses='jinahub+docker://TextPaddleEncoder',
+               volumes='/your_home_folder/.paddlehub:/root/.paddlehub')
 
 
 def check_resp(resp):
