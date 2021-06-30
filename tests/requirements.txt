@@ -1,4 +1,4 @@
-git+https://github.com/jina-ai/jina.git@v2.0.0rc8#egg=jina[hub]
+git+https://github.com/jina-ai/jina.git@v2.0.0#egg=jina[hub]
 paddlepaddle==2.1.0
 paddlehub==2.1.0
 pytest==6.2.4
