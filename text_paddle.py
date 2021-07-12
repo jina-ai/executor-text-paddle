@@ -1,7 +1,7 @@
 __copyright__ = "Copyright (c) 2020-2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Tuple
 
 import numpy as np
 import paddlehub as hub
@@ -40,7 +40,7 @@ class TextPaddleEncoder(Executor):
         model_name: Optional[str] = 'ernie_tiny',
         on_gpu: bool = False,
         default_batch_size: int = 32,
-        default_traversal_paths: List[str] = None,
+        default_traversal_paths: Tuple[str] = ('r', ),
         *args,
         **kwargs,
     ):
@@ -48,7 +48,7 @@ class TextPaddleEncoder(Executor):
         self.on_gpu = on_gpu
         self.model = hub.Module(name=model_name)
         self.default_batch_size = default_batch_size
-        self.default_traversal_paths = default_traversal_paths or ['r']
+        self.default_traversal_paths = default_traversal_paths
 
     @requests
     def encode(self, docs: DocumentArray, parameters: Dict, **kwargs):
