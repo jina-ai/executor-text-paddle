@@ -1,16 +1,12 @@
 __copyright__ = "Copyright (c) 2020-2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
-from typing import Optional, List, Any, Dict, Union
+from typing import Optional, List, Any, Dict, Tuple
 
 import numpy as np
 import paddlehub as hub
 from jina import Executor, DocumentArray, requests
-
-
-def _batch_generator(data: List[Any], batch_size: int):
-    for i in range(0, len(data), batch_size):
-        yield data[i : i + batch_size]
+from jina_commons.batching import get_docs_batch_generator
 
 
 class TextPaddleEncoder(Executor):
@@ -44,7 +40,7 @@ class TextPaddleEncoder(Executor):
         model_name: Optional[str] = 'ernie_tiny',
         on_gpu: bool = False,
         default_batch_size: int = 32,
-        default_traversal_paths: List[str] = ['r'],
+        default_traversal_paths: Tuple[str] = ('r', ),
         *args,
         **kwargs,
     ):
@@ -54,20 +50,8 @@ class TextPaddleEncoder(Executor):
         self.default_batch_size = default_batch_size
         self.default_traversal_paths = default_traversal_paths
 
-    def _get_input_data(self, docs, parameters):
-        trav_paths = parameters.get('traversal_paths', self.default_traversal_paths)
-        batch_size = parameters.get('batch_size', self.default_batch_size)
-
-        # traverse thought all documents which have to be processed
-        flat_docs = docs.traverse_flat(trav_paths)
-
-        # filter out documents without text
-        filtered_docs = [doc for doc in flat_docs if doc.text]
-
-        return _batch_generator(filtered_docs, batch_size)
-
     @requests
-    def encode(self, docs: DocumentArray, parameters: Optional[Dict] = {}, **kwargs):
+    def encode(self, docs: DocumentArray, parameters: Dict, **kwargs):
         """Encode doc content into vector representation.
 
         :param docs: `DocumentArray` passed from the previous ``Executor``.
@@ -76,7 +60,12 @@ class TextPaddleEncoder(Executor):
         :param kwargs: Additional key value arguments.
         """
         if docs:
-            document_batches_generator = self._get_input_data(docs, parameters)
+            document_batches_generator = get_docs_batch_generator(
+                docs,
+                traversal_path=parameters.get('traversal_paths', self.default_traversal_paths),
+                batch_size=parameters.get('batch_size', self.default_batch_size),
+                needs_attr='text'
+            )
             for batch_of_docs in document_batches_generator:
                 pooled_features = []
                 contents = [[doc.content] for doc in batch_of_docs]

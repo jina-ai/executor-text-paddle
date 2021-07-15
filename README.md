@@ -9,8 +9,15 @@
 
 ## Prerequisites
 
-None
-
+To install the dependencies locally run 
+```
+pip install .
+pip install -r tests/requirements.txt
+```
+To verify the installation works:
+```
+pytest tests
+```
 
 ## Usages
 
