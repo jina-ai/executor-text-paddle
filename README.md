@@ -1,3 +1,5 @@
+MOVED TO https://github.com/jina-ai/executors/tree/main/jinahub/encoders/text/TextPaddleEncoder
+
 # TextPaddleEncoder
 
 **TextPaddleEncoder** is a class that wraps the text embedding functionality from the **PaddlePaddle** and **PaddleHub**.
